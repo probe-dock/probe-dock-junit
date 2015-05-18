@@ -9,8 +9,8 @@
 	<version>0.1.0</version>
 	<packaging>jar</packaging>
 
-	<name>Probe Dock jUnit</name>
-	<description>Probe Dock JUnit client.</description>
+	<name>Probe Dock Junit</name>
+	<description>Probe Dock Junit client.</description>
 
 	<url>https://github.com/probe-dock/probe-dock-junit</url>
 
