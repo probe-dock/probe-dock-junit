@@ -1,6 +1,6 @@
 # Probe Dock Junit
 
-**Junit client probe for [Probe Dock](https://github.com/probe-dock/probe-dock).**
+**Junit client probe for [Probe Dock](https://github.com/probedock/probedock).**
 
 [![License](https://img.shields.io/github/license/probe-dock/probe-dock-junit.svg)](LICENSE.txt)
 
@@ -15,7 +15,7 @@ In your pom file, add the following dependency:
 ```xml
 <dependency>
   <groupId>io.probedock.client</groupId>
-  <artifactId>probe-dock-junit</artifactId>
+  <artifactId>probedock-junit</artifactId>
   <version>0.1.0</version>
 </dependency>
 ```
