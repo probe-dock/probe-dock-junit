@@ -2,7 +2,7 @@
 
 **Junit client probe for [Probe Dock](https://github.com/probedock/probedock).**
 
-[![License](https://img.shields.io/github/license/probe-dock/probe-dock-junit.svg)](LICENSE.txt)
+[![License](https://img.shields.io/github/license/probedock/probedock-junit.svg)](LICENSE.txt)
 
 ## Requirements
 
