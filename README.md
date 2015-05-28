@@ -17,7 +17,7 @@ In your pom file, add the following dependency:
   <groupId>io.probedock.client</groupId>
   <artifactId>probe-dock-junit</artifactId>
   <version>0.1.0</version>
-</dependenc>
+</dependency>
 ```
 
 Configure your maven surefire plugin to add a Junit listener:
