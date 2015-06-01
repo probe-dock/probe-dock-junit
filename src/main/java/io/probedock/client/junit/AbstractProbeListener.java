@@ -130,7 +130,13 @@ public abstract class AbstractProbeListener extends RunListener {
 	 * @throws NoSuchMethodException 
 	 */
 	protected ProbeTest getMethodAnnotation(Description description) throws NoSuchMethodException {
-		return description.getTestClass().getMethod(description.getMethodName()).getAnnotation(ProbeTest.class);
+		String methodName = description.getMethodName();
+
+		if (methodName.contains("[")) {
+			methodName = methodName.replaceAll("\\[.*\\]", "");
+		}
+
+		return description.getTestClass().getMethod(methodName).getAnnotation(ProbeTest.class);
 	}
 	
 	/**
