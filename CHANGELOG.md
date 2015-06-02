@@ -1,3 +1,7 @@
+## v0.1.5 - June 02, 2015
+
+* Added `:` in test names between humanize class name and humanize method name.
+
 ## v0.1.1 - v0.1.4 - May 28, 2015 - June 01, 2015
 
 * Several bug fixes

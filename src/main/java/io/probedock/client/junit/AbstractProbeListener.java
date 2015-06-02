@@ -203,7 +203,7 @@ public abstract class AbstractProbeListener extends RunListener {
 	 */
 	private String getName(Description description, ProbeTest mAnnotation) {
 		if (mAnnotation == null || mAnnotation.name() == null || mAnnotation.name().isEmpty()) {
-			return Inflector.getHumanName(description.getTestClass().getSimpleName() + " " + description.getMethodName());
+			return Inflector.getHumanName(description.getTestClass().getSimpleName() + ": " + description.getMethodName());
 		}
 		else {
 			return mAnnotation.name();
