@@ -2,6 +2,7 @@
 
 * **Breaking changes**
 * Bumped the Probe Dock Java lib to version v0.2.0 (see: [changelog](https://github.com/probedock/probedock-java/blob/master/CHANGELOG.md))
+* Gather more information attached in the metadata of the test run like the memory consumption, OS info, ...
 
 ## v0.1.5 - June 02, 2015
 
