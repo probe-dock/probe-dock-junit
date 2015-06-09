@@ -1,29 +1,44 @@
 package io.probedock.client.junit;
 
+import io.probedock.client.ProbeRuntimeException;
 import io.probedock.client.annotations.ProbeTest;
 import io.probedock.client.annotations.ProbeTestClass;
-import io.probedock.client.common.config.ProbeRuntimeException;
-import io.probedock.client.common.model.v1.ModelFactory;
-import io.probedock.client.common.model.v1.TestResult;
-import io.probedock.client.common.model.v1.TestRun;
+import io.probedock.client.common.config.Configuration;
+import io.probedock.client.common.model.v1.*;
 import io.probedock.client.core.connector.Connector;
 import io.probedock.client.core.storage.FileStore;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The test unit listener is used to send the result to the Probe Dock server
  *
- * @author Laurent Prevost <laurent.prevost@probe-dock.io>
+ * @author Laurent Prevost <laurent.prevost@probedock.io>
  */
 public class ProbeListener extends AbstractProbeListener {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProbeListener.class);
+	private static final Logger LOGGER = Logger.getLogger(ProbeListener.class.getCanonicalName());
+
+	/**
+	 * Probe Dock JUnit and version
+	 */
+	private static final String PROBE_DOCK_NAME = "JUnit";
+	private static final String PROBE_DOCK_VERSION = ResourceBundle.getBundle("version").getString("version");
+
+	/**
+	 * The execution context
+	 */
+	protected Context context;
+
+	/**
+	 * The test run to publish
+	 */
+	protected TestRun testRun;
 
 	/**
 	 * Store the list of the tests executed
@@ -36,44 +51,75 @@ public class ProbeListener extends AbstractProbeListener {
 	 */
 	private Set<String> testFailures = new HashSet<>();
 
+	/**
+	 * Constructor
+	 */
 	public ProbeListener() {}
 
+	/**
+	 * Constructor
+	 *
+	 * @param category The default category for the listener
+	 */
 	public ProbeListener(String category) {
 		super(category);
 	}
 
 	@Override
-	public void testRunFinished(Result result) throws Exception {
+	public void testRunStarted(Description description) throws Exception {
+		super.testRunStarted(description);
 
 		// Ensure there is nothing to do when ROX is disabled
 		if (configuration.isDisabled()) {
 			return;
 		}
 
+		String uid = configuration.getCurrentUid();
+
+		context = ModelFactory.createContext();
+		Probe probe = ModelFactory.createProbe(PROBE_DOCK_NAME, PROBE_DOCK_VERSION);
+
+		testRun = ModelFactory.createTestRun(
+			Configuration.getInstance(),
+			context,
+			probe,
+			configuration.getProjectApiId(),
+			configuration.getProjectVersion(),
+			configuration.getPipeline(),
+			configuration.getStage(),
+			uid != null ? Arrays.asList(ModelFactory.createTestReport(uid)) : null,
+			null
+		);
+	}
+
+	@Override
+	public void testRunFinished(Result result) throws Exception {
+		// Ensure there is nothing to do when ROX is disabled
+		if (configuration.isDisabled()) {
+			return;
+		}
+
 		if (!results.isEmpty()) {
+			ModelFactory.enrichContext(context);
+			long runEndedDate = System.currentTimeMillis();
+			testRun.setDuration(runEndedDate - runStartedDate);
+			testRun.addTestResults(results);
 
 			try {
 				publishTestRun();
 			} catch (ProbeRuntimeException pre) {
-				LOGGER.warn("Could not publish or save test run", pre);
+				LOGGER.log(Level.WARNING, "Could not publish or save test run", pre);
 			}
 		}
 	}
 
+	/**
+	 * Publish the results to Probe Dock
+	 *
+	 * @throws IOException Any I/O error
+	 */
 	private void publishTestRun() throws IOException {
 		if (configuration.isPublish() || configuration.isSave()) {
-			long runEndedDate = System.currentTimeMillis();
-
-			String uid = configuration.getCurrentUid();
-
-			TestRun testRun = ModelFactory.createTestRun(
-				configuration.getProjectApiId(),
-				configuration.getProjectVersion(),
-				runEndedDate - runStartedDate,
-				results,
-				uid != null ? Arrays.asList(ModelFactory.createTestReport(uid)) : null
-			);
-
 			if (configuration.isSave()) {
 				new FileStore(configuration).save(testRun);
 			}
@@ -93,7 +139,7 @@ public class ProbeListener extends AbstractProbeListener {
 			return;
 		}
 
-		testStartDates.put(getTechnicalName(description), System.currentTimeMillis());
+		testStartDates.put(getFingerprint(description), System.currentTimeMillis());
 	}
 
 	@Override
@@ -108,9 +154,11 @@ public class ProbeListener extends AbstractProbeListener {
 		ProbeTest mAnnotation = getMethodAnnotation(description);
 		ProbeTestClass cAnnotation = getClassAnnotation(description);
 
-		if (!testFailures.contains(getTechnicalName(description))) {
+		String fingerprint = getFingerprint(description);
+
+		if (!testFailures.contains(fingerprint)) {
 			// Create a test result
-			TestResult testResult = createTestResult(description, mAnnotation, cAnnotation, true, null);
+			TestResult testResult = createTestResult(fingerprint, description, mAnnotation, cAnnotation, true, null);
 
 			results.add(testResult);
 		}
@@ -128,10 +176,12 @@ public class ProbeListener extends AbstractProbeListener {
 		ProbeTest mAnnotation = getMethodAnnotation(failure.getDescription());
 		ProbeTestClass cAnnotation = getClassAnnotation(failure.getDescription());
 
-		testFailures.add(getTechnicalName(failure.getDescription()));
+		String fingerprint = getFingerprint(failure.getDescription());
+
+		testFailures.add(fingerprint);
 
 		// Create the test result
-		TestResult testResult = createTestResult(failure.getDescription(), mAnnotation, cAnnotation, false, createAndlogStackTrace(failure));
+		TestResult testResult = createTestResult(fingerprint, failure.getDescription(), mAnnotation, cAnnotation, false, createAndlogStackTrace(failure));
 
 		results.add(testResult);
 	}

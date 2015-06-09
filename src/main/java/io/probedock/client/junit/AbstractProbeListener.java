@@ -3,41 +3,36 @@ package io.probedock.client.junit;
 import io.probedock.client.annotations.ProbeTest;
 import io.probedock.client.annotations.ProbeTestClass;
 import io.probedock.client.common.config.Configuration;
-import io.probedock.client.common.model.v1.ModelFactory;
-import io.probedock.client.common.model.v1.TestResult;
+import io.probedock.client.common.model.v1.*;
+import io.probedock.client.common.utils.FingerprintGenerator;
 import io.probedock.client.common.utils.Inflector;
-import io.probedock.client.common.utils.MetaDataBuilder;
 import io.probedock.client.utils.CollectionHelper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
+import java.util.logging.Logger;
+
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Shared code to create Junit Probe Dock listeners
  *
- * @author Laurent Prevost <laurent.prevost@probe-dock.io>
+ * @author Laurent Prevost <laurent.prevost@probedock.io>
  */
 public abstract class AbstractProbeListener extends RunListener {
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractProbeListener.class);
+	private static final Logger LOGGER = Logger.getLogger(AbstractProbeListener.class.getCanonicalName());
 	
 	/**
 	 * Probe Dock configuration
 	 */
 	protected static final Configuration configuration = Configuration.getInstance();
-	
+
 	/**
 	 * Default category when none is specified
 	 */
-	private static final String DEFAULT_CATEGORY	= "JUnit";
-	private static final String DEFAULT_TAG			= "unit";
-	
+	private static final String DEFAULT_CATEGORY = "unit";
+
 	/**
 	 * Store the date when the run started
 	 */
@@ -61,15 +56,9 @@ public abstract class AbstractProbeListener extends RunListener {
 	private String category;
 	
 	/**
-	 * List of meta data extractors
-	 */
-	private final List<TestMetaDataExtratctor> extractors = new ArrayList<>();
-	
-	/**
 	 * Constructor
 	 */
 	public AbstractProbeListener() {
-		extractors.add(new StandardTestMetaDataExtractor());
 	}
 	
 	/**
@@ -85,19 +74,11 @@ public abstract class AbstractProbeListener extends RunListener {
 	@Override
 	public void testStarted(Description description) throws Exception {
 		super.testStarted(description);
-		
-		for (TestMetaDataExtratctor extractor : extractors) {
-			extractor.before(description);
-		}
 	}
 
 	@Override
 	public void testFinished(Description description) throws Exception {
 		super.testFinished(description);
-
-		for (TestMetaDataExtratctor extractor : extractors) {
-			extractor.after(description);
-		}
 	}
 	
 	/**
@@ -105,15 +86,6 @@ public abstract class AbstractProbeListener extends RunListener {
 	 */
 	public void setFullStackTraces(Boolean fullStackTraces) {
 		this.fullStackTraces = fullStackTraces;
-	}
-	
-	/**
-	 * Add an extractor to the list of extractors
-	 * 
-	 * @param extractor Extractor to add
-	 */
-	public void addExctractor(TestMetaDataExtratctor extractor) {
-		extractors.add(extractor);
 	}
 	
 	@Override
@@ -151,7 +123,8 @@ public abstract class AbstractProbeListener extends RunListener {
 
 	/**
 	 * Create a test based on the different information gathered from class, method and description
-	 * 
+	 *
+	 * @param fingerprint The fingerprint of the test
 	 * @param description jUnit test description
 	 * @param mAnnotation Method annotation
 	 * @param cAnnotation Class annotation
@@ -159,29 +132,29 @@ public abstract class AbstractProbeListener extends RunListener {
 	 * @param message Message associated to the test result
 	 * @return The test created from all the data available
 	 */
-	protected TestResult createTestResult(Description description, ProbeTest mAnnotation, ProbeTestClass cAnnotation, boolean passed, String message) {
-		MetaDataBuilder data = new MetaDataBuilder();
-		
-		for (TestMetaDataExtratctor extractor : extractors) {
-			data.add(extractor.extract(description));
-		}
-
-		return ModelFactory.createTestResult(
+	protected TestResult createTestResult(String fingerprint, Description description, ProbeTest mAnnotation, ProbeTestClass cAnnotation, boolean passed, String message) {
+		TestResult result = ModelFactory.createTestResult(
 			getKey(mAnnotation),
+			fingerprint,
 			getName(description, mAnnotation),
 			getCategory(cAnnotation, mAnnotation),
-			System.currentTimeMillis() - testStartDates.get(getTechnicalName(description)),
+			System.currentTimeMillis() - testStartDates.get(fingerprint),
 			message,
 			passed,
 			isActive(mAnnotation),
+			getContributors(mAnnotation, cAnnotation),
 			getTags(mAnnotation, cAnnotation),
 			getTickets(mAnnotation, cAnnotation),
-			data.toMetaData()
+			null
 		);
+
+		ModelFactory.enrichTestResult(result, description.getTestClass().getPackage().getName(), description.getTestClass().getName(), description.getMethodName());
+
+		return result;
 	}
 
 	/**
-	 * Retrieve the key from the annotation
+	 * Retrieve the tags from the annotations
 	 *
 	 * @param annotation The annotation
 	 * @return The key or null if there is no key
@@ -233,7 +206,18 @@ public abstract class AbstractProbeListener extends RunListener {
 			return DEFAULT_CATEGORY;
 		}
 	}
-	
+
+	/**
+	 * Compute the list of contributors associated for a test
+	 *
+	 * @param methodAnnotation The method annotation to get info
+	 * @param classAnnotation The class annotation to get info
+	 * @return The contributors associated to the test
+	 */
+	private Set<String> getContributors(ProbeTest methodAnnotation, ProbeTestClass classAnnotation) {
+		return CollectionHelper.getContributors(configuration.getTags(), methodAnnotation, classAnnotation);
+	}
+
 	/**
 	 * Compute the list of tags associated for a test
 	 * 
@@ -242,13 +226,7 @@ public abstract class AbstractProbeListener extends RunListener {
 	 * @return The tags associated to the test
 	 */
 	private Set<String> getTags(ProbeTest methodAnnotation, ProbeTestClass classAnnotation) {
-		Set<String> tags = CollectionHelper.getTags(configuration.getTags(), methodAnnotation, classAnnotation);
-		
-		if (!tags.contains(DEFAULT_TAG)) {
-			tags.add(DEFAULT_TAG);
-		}
-		
-		return tags;
+		return CollectionHelper.getTags(configuration.getTags(), methodAnnotation, classAnnotation);
 	}
 
 	/**
@@ -298,7 +276,7 @@ public abstract class AbstractProbeListener extends RunListener {
 				}
 			}
 			
-			LOGGER.info("\n{}\n{}", failure.getTestHeader(), sb.toString());
+			LOGGER.info("\n" + failure.getTestHeader() + "\n" + sb.toString());
 		}
 		
 		return sb.toString();
@@ -312,5 +290,19 @@ public abstract class AbstractProbeListener extends RunListener {
 	 */
 	protected String getTechnicalName(Description description) {
 		return description.getClassName() + "." + description.getMethodName();
+	}
+
+	/**
+	 * Calculate a fingerpring for a test
+	 *
+	 * @param description The description to retrieve package, class and method
+	 * @return The fingerprint calculated
+	 */
+	protected String getFingerprint(Description description) {
+		return FingerprintGenerator.fingerprint(
+			description.getTestClass().getPackage().getName(),
+			description.getTestClass().getName(),
+			description.getMethodName()
+		);
 	}
 }
