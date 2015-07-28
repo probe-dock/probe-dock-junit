@@ -74,8 +74,6 @@ public class ProbeListener extends AbstractProbeListener {
 			return;
 		}
 
-		String uid = configuration.getCurrentUid();
-
 		context = ModelFactory.createContext();
 		Probe probe = ModelFactory.createProbe(PROBE_DOCK_NAME, PROBE_DOCK_VERSION);
 
@@ -87,7 +85,7 @@ public class ProbeListener extends AbstractProbeListener {
 			configuration.getProjectVersion(),
 			configuration.getPipeline(),
 			configuration.getStage(),
-			uid != null ? Arrays.asList(ModelFactory.createTestReport(uid)) : null,
+			null,
 			null
 		);
 	}
