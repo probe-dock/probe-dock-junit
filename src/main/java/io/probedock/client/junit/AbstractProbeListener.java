@@ -299,10 +299,6 @@ public abstract class AbstractProbeListener extends RunListener {
 	 * @return The fingerprint calculated
 	 */
 	protected String getFingerprint(Description description) {
-		return FingerprintGenerator.fingerprint(
-			description.getTestClass().getPackage().getName(),
-			description.getTestClass().getName(),
-			description.getMethodName()
-		);
+		return FingerprintGenerator.fingerprint(description.getTestClass(), description.getMethodName());
 	}
 }
