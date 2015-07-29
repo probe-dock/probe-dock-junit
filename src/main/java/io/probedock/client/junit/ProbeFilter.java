@@ -1,8 +1,9 @@
 package io.probedock.client.junit;
 
+import io.probedock.client.core.filters.FilterDefinition;
+import io.probedock.client.core.filters.FilterDefinitionImpl;
 import io.probedock.client.core.filters.FilterUtils;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.junit.runner.Description;
 import org.junit.runner.manipulation.Filter;
@@ -16,7 +17,7 @@ public class ProbeFilter extends Filter {
 	/**
 	 * Define the filters to apply
 	 */
-	private List<String> filters;
+	private List<FilterDefinition> filters;
 	
 	/**
 	 * Default constructor aims to facilitate the reflection
@@ -25,16 +26,27 @@ public class ProbeFilter extends Filter {
 		filters = new ArrayList<>();
 	};
 	
-	public ProbeFilter(String[] filters) {
-		this.filters = Arrays.asList(filters);
+	public ProbeFilter(List<FilterDefinition> filters) {
+		this.filters = filters;
 	}
 	
 	/**
 	 * @param filter Add a filter
 	 */
 	public void addFilter(String filter) {
-		if (filters != null && filter != null && !filter.isEmpty() && !filters.contains(filter)) {
-			filters.add(filter);
+		boolean found = false;
+
+		if (filters != null) {
+			for (FilterDefinition filterDefinition : filters) {
+				if (filterDefinition.getText().equalsIgnoreCase(filter)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				filters.add(new FilterDefinitionImpl("*", filter));
+			}
 		}
 	}
 	
@@ -43,10 +55,14 @@ public class ProbeFilter extends Filter {
 		if (!description.isTest()) {
 			return true;
 		}
+
+		if (description.isSuite()) {
+			return false;
+		}
 		
 		// Delegate the filtering to filter utils
 		else {
-			return FilterUtils.isRunnable(description.getTestClass(), description.getMethodName(), filters.toArray(new String[filters.size()]));
+			return FilterUtils.isRunnable(description.getTestClass(), description.getMethodName(), filters);
 		}
 	}
 
