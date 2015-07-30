@@ -136,7 +136,7 @@ public abstract class AbstractProbeListener extends RunListener {
 		TestResult result = ModelFactory.createTestResult(
 			getKey(mAnnotation),
 			fingerprint,
-			getName(description, mAnnotation),
+			Inflector.forgeName(description.getTestClass(), description.getMethodName(), mAnnotation),
 			getCategory(cAnnotation, mAnnotation),
 			System.currentTimeMillis() - testStartDates.get(fingerprint),
 			message,
@@ -166,22 +166,6 @@ public abstract class AbstractProbeListener extends RunListener {
 	private Boolean isActive(ProbeTest annotation) {
 		return annotation != null ? annotation.active() : null;
 	}
-	
-	/**
-	 * Retrieve a name from a test
-	 * 
-	 * @param description The description of the test
-	 * @param mAnnotation The method annotation
-	 * @return The name retrieved
-	 */
-	private String getName(Description description, ProbeTest mAnnotation) {
-		if (mAnnotation == null || mAnnotation.name() == null || mAnnotation.name().isEmpty()) {
-			return Inflector.getHumanName(description.getTestClass().getSimpleName() + ": " + description.getMethodName());
-		}
-		else {
-			return mAnnotation.name();
-		}
-	} 
 	
 	/**
 	 * Retrieve the category to apply to the test
