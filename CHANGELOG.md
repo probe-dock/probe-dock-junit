@@ -1,3 +1,7 @@
+## v0.2.2 - August 31, 2015
+
+* Bumped lib version
+
 ## v0.2.0 - June 09, 2015
 
 * **Breaking changes**
