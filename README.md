@@ -23,7 +23,9 @@ In your pom file, add the following dependency:
 Configure your maven surefire plugin to add a Junit listener:
 
 ```xml
-<plugin>
+<plugins>
+  <!-- Add the Maven Surefire plugin or adapt its configuration. -->
+  <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-surefire-plugin</artifactId>
     <version>2.16</version>
@@ -35,7 +37,8 @@ Configure your maven surefire plugin to add a Junit listener:
             </property>
         </properties>
     </configuration>
-</plugin>
+  </plugin>  
+</plugins>
 ```
 
 ## Contributing
