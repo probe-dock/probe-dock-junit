@@ -17,6 +17,7 @@ In your pom file, add the following dependency:
   <groupId>io.probedock.client</groupId>
   <artifactId>probedock-junit</artifactId>
   <version>0.2.2</version>
+  <scope>test</scope>
 </dependency>
 ```
 
