@@ -1,3 +1,7 @@
+## v0.2.3 - October 19, 2015
+
+* Changed `unit` category by `JUnit`. This will be always true with this probe. Remember, the category can be configured by project or annotations.
+
 ## v0.2.2 - August 31, 2015
 
 * Bumped lib version

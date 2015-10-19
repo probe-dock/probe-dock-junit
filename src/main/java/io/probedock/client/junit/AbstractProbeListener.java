@@ -30,7 +30,7 @@ public abstract class AbstractProbeListener extends RunListener {
     /**
      * Default category when none is specified
      */
-    protected static final String DEFAULT_CATEGORY = "unit";
+    protected static final String DEFAULT_CATEGORY = "JUnit";
 
     /**
      * Store the date when the run started
