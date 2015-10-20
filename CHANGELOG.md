@@ -1,3 +1,7 @@
+## v0.3.0 - October 20, 2015
+
+* `testIgnored` and `testAssumptionFailure` will set the test as `inactive`. In general, both event are supposed to be tests skipped by JUnit runner.
+
 ## v0.2.3 - October 19, 2015
 
 * Changed `unit` category by `JUnit`. This will be always true with this probe. Remember, the category can be configured by project or annotations.

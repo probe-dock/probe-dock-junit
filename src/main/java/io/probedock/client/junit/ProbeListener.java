@@ -5,7 +5,6 @@ import io.probedock.client.annotations.ProbeTest;
 import io.probedock.client.annotations.ProbeTestClass;
 import io.probedock.client.common.config.Configuration;
 import io.probedock.client.common.model.v1.*;
-import io.probedock.client.common.utils.TestResultDataUtils;
 import io.probedock.client.core.connector.Connector;
 import io.probedock.client.core.storage.FileStore;
 
@@ -54,6 +53,11 @@ public class ProbeListener extends AbstractProbeListener {
     private Set<String> testFailures = new HashSet<>();
 
     /**
+     * Store the test ignored or skipped
+     */
+    private Set<String> testIgnored = new HashSet<>();
+
+    /**
      * Constructor
      */
     public ProbeListener() {
@@ -72,7 +76,6 @@ public class ProbeListener extends AbstractProbeListener {
     public void testRunStarted(Description description) throws Exception {
         super.testRunStarted(description);
 
-        // Ensure there is nothing to do when ROX is disabled
         if (configuration.isDisabled()) {
             return;
         }
@@ -95,7 +98,6 @@ public class ProbeListener extends AbstractProbeListener {
 
     @Override
     public void testRunFinished(Result result) throws Exception {
-        // Ensure there is nothing to do when ROX is disabled
         if (configuration.isDisabled()) {
             return;
         }
@@ -135,7 +137,6 @@ public class ProbeListener extends AbstractProbeListener {
     public void testStarted(Description description) throws Exception {
         super.testStarted(description);
 
-        // Ensure there is nothing to do when ROX is disabled
         if (configuration.isDisabled()) {
             return;
         }
@@ -147,7 +148,6 @@ public class ProbeListener extends AbstractProbeListener {
     public void testFinished(Description description) throws Exception {
         super.testFinished(description);
 
-        // Ensure there is nothing to do when ROX is disabled
         if (configuration.isDisabled()) {
             return;
         }
@@ -161,6 +161,11 @@ public class ProbeListener extends AbstractProbeListener {
             // Create a test result
             TestResult testResult = createTestResult(fingerprint, description, mAnnotation, cAnnotation, true, null);
 
+            // Send the result as inactive test when it is ignored
+            if (testIgnored.contains(testResult.getFingerprint())) {
+                testResult.setActive(false);
+            }
+
             results.add(testResult);
         }
     }
@@ -169,7 +174,6 @@ public class ProbeListener extends AbstractProbeListener {
     public void testFailure(Failure failure) throws Exception {
         super.testFailure(failure);
 
-        // Ensure there is nothing to do when ROX is disabled
         if (configuration.isDisabled()) {
             return;
         }
@@ -184,6 +188,34 @@ public class ProbeListener extends AbstractProbeListener {
         // Create the test result
         TestResult testResult = createTestResult(fingerprint, failure.getDescription(), mAnnotation, cAnnotation, false, createAndlogStackTrace(failure));
 
+        // Send the result as inactive test when it is ignored
+        if (testIgnored.contains(testResult.getFingerprint())) {
+            testResult.setActive(false);
+        }
+
         results.add(testResult);
+    }
+
+    @Override
+    public void testAssumptionFailure(Failure failure) {
+        super.testAssumptionFailure(failure);
+        registerIgnoredTest(failure.getDescription());
+    }
+
+    @Override
+    public void testIgnored(Description description) throws Exception {
+        super.testIgnored(description);
+        registerIgnoredTest(description);
+    }
+
+    /**
+     * Register an ignored test to make sure the results are sent correctly
+     *
+     * @param description The description of the test
+     */
+    private void registerIgnoredTest(Description description) {
+        if (!configuration.isDisabled()) {
+            testIgnored.add(getFingerprint(description));
+        }
     }
 }
