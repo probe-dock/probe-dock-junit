@@ -6,7 +6,7 @@
 
     <groupId>io.probedock.client</groupId>
     <artifactId>probedock-junit</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
 
     <name>Probe Dock Junit</name>
@@ -185,7 +185,7 @@
         <dependency>
             <groupId>io.probedock.client</groupId>
             <artifactId>probedock-java</artifactId>
-            <version>0.2.2</version>
+            <version>0.3.0</version>
         </dependency>
 
         <dependency>

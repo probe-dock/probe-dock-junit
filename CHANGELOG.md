@@ -1,3 +1,7 @@
+## v0.4.0 - October 28, 2015
+
+* Bumped version of Probe Dock lib
+
 ## v0.3.0 - October 20, 2015
 
 * `testIgnored` and `testAssumptionFailure` will set the test as `inactive`. In general, both event are supposed to be tests skipped by JUnit runner.

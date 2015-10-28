@@ -134,7 +134,7 @@ public abstract class AbstractProbeListener extends RunListener {
             TestResultDataUtils.getKey(mAnnotation),
             fingerprint,
             Inflector.forgeName(description.getTestClass(), description.getMethodName(), mAnnotation),
-            TestResultDataUtils.getCategory(configuration, cAnnotation, mAnnotation, getCategory()),
+            TestResultDataUtils.getCategory(description.getTestClass().getPackage().getName(), configuration, cAnnotation, mAnnotation, getCategory()),
             System.currentTimeMillis() - testStartDates.get(fingerprint),
             message,
             passed,
