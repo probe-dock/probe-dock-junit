@@ -1,3 +1,8 @@
+## v0.4.1 - November 9, 2015
+
+* Fixed: https://github.com/probedock/probedock-junit/issues/1
+* Bumped version of Probe Dock lib
+
 ## v0.4.0 - October 28, 2015
 
 * Bumped version of Probe Dock lib

@@ -134,7 +134,7 @@ public abstract class AbstractProbeListener extends RunListener {
             TestResultDataUtils.getKey(mAnnotation),
             fingerprint,
             Inflector.forgeName(description.getTestClass(), description.getMethodName(), mAnnotation),
-            TestResultDataUtils.getCategory(description.getTestClass().getPackage().getName(), configuration, cAnnotation, mAnnotation, getCategory()),
+            TestResultDataUtils.getCategory(getPackage(description.getTestClass()), configuration, cAnnotation, mAnnotation, getCategory()),
             System.currentTimeMillis() - testStartDates.get(fingerprint),
             message,
             passed,
@@ -145,7 +145,7 @@ public abstract class AbstractProbeListener extends RunListener {
             null
         );
 
-        ModelFactory.enrichTestResult(result, description.getTestClass().getPackage().getName(), description.getTestClass().getName(), description.getMethodName());
+        ModelFactory.enrichTestResult(result, getPackage(description.getTestClass()), description.getTestClass().getName(), description.getMethodName());
 
         return result;
     }
@@ -209,5 +209,15 @@ public abstract class AbstractProbeListener extends RunListener {
      */
     protected final String getCategory() {
         return category != null && !category.isEmpty() ? category : DEFAULT_CATEGORY;
+    }
+
+    /**
+     * Retrieve the package name if available, if not, default package name is used.
+     *
+     * @param cls The class to extract the package name
+     * @return The package name if found, "defaultPackage" if not found
+     */
+    protected final String getPackage(Class cls) {
+        return cls.getPackage() != null ? cls.getPackage().getName() : "defaultPackage";
     }
 }
