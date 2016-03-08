@@ -10,6 +10,10 @@ import io.probedock.client.common.utils.TestResultDataUtils;
 import java.util.*;
 import java.util.logging.Logger;
 
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
+import javassist.NotFoundException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
@@ -145,7 +149,16 @@ public abstract class AbstractProbeListener extends RunListener {
             null
         );
 
-        ModelFactory.enrichTestResult(result, getPackage(description.getTestClass()), description.getTestClass().getName(), description.getMethodName());
+        int lineNumber = -1;
+        try {
+            ClassPool pool = ClassPool.getDefault();
+            CtClass cc = pool.get(description.getClassName());
+            CtMethod methodX = cc.getDeclaredMethod(description.getMethodName());
+            lineNumber = methodX.getMethodInfo().getLineNumber(0) - 1;
+        }
+        catch (NotFoundException nfe) {}
+
+        ModelFactory.enrichTestResult(configuration, result, getPackage(description.getTestClass()), description.getTestClass().getSimpleName(), description.getMethodName(), lineNumber);
 
         return result;
     }

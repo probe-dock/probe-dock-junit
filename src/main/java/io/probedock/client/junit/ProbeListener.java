@@ -80,7 +80,7 @@ public class ProbeListener extends AbstractProbeListener {
             return;
         }
 
-        context = ModelFactory.createContext();
+        context = ModelFactory.createContext(configuration);
         Probe probe = ModelFactory.createProbe(PROBE_DOCK_NAME, PROBE_DOCK_VERSION);
 
         testRun = ModelFactory.createTestRun(

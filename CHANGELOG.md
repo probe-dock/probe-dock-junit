@@ -1,3 +1,8 @@
+## v0.5.0 - March 8, 2016
+
+* Updated the Java lib to v0.4.0 (brings SCM data support, see: https://github.com/probedock/probedock-java/blob/master/CHANGELOG.md for more details)
+* Added the possibility to retrieve the file path and line number of each test.
+
 ## v0.4.1 - November 9, 2015
 
 * Fixed: https://github.com/probedock/probedock-junit/issues/1
