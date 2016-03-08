@@ -74,12 +74,16 @@ public abstract class AbstractProbeListener extends RunListener {
 
     @Override
     public void testStarted(Description description) throws Exception {
-        super.testStarted(description);
+        if (description.isTest()) {
+            super.testStarted(description);
+        }
     }
 
     @Override
     public void testFinished(Description description) throws Exception {
-        super.testFinished(description);
+        if (description.isTest()) {
+            super.testFinished(description);
+        }
     }
 
     /**

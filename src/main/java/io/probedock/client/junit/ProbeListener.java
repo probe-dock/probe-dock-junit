@@ -135,6 +135,10 @@ public class ProbeListener extends AbstractProbeListener {
 
     @Override
     public void testStarted(Description description) throws Exception {
+        if (!description.isTest()) {
+            return;
+        }
+
         super.testStarted(description);
 
         if (configuration.isDisabled()) {
@@ -146,6 +150,10 @@ public class ProbeListener extends AbstractProbeListener {
 
     @Override
     public void testFinished(Description description) throws Exception {
+        if (!description.isTest()) {
+            return;
+        }
+
         super.testFinished(description);
 
         if (configuration.isDisabled()) {
@@ -172,6 +180,10 @@ public class ProbeListener extends AbstractProbeListener {
 
     @Override
     public void testFailure(Failure failure) throws Exception {
+        if (!failure.getDescription().isTest()) {
+            return;
+        }
+
         super.testFailure(failure);
 
         if (configuration.isDisabled()) {
@@ -198,13 +210,23 @@ public class ProbeListener extends AbstractProbeListener {
 
     @Override
     public void testAssumptionFailure(Failure failure) {
+        if (!failure.getDescription().isTest()) {
+            return;
+        }
+
         super.testAssumptionFailure(failure);
+
         registerIgnoredTest(failure.getDescription());
     }
 
     @Override
     public void testIgnored(Description description) throws Exception {
+        if (!description.isTest()) {
+            return;
+        }
+
         super.testIgnored(description);
+
         registerIgnoredTest(description);
     }
 

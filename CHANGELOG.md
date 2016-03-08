@@ -1,3 +1,7 @@
+## v0.5.1 - March 8, 2016
+
+* Fixed NPE when any exception is raised in @BeforeClass (probably same behavior with @AfterClass)
+
 ## v0.5.0 - March 8, 2016
 
 * Updated the Java lib to v0.4.0 (brings SCM data support, see: https://github.com/probedock/probedock-java/blob/master/CHANGELOG.md for more details)
