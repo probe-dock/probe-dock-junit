@@ -20,7 +20,7 @@ import org.junit.runner.notification.Failure;
 /**
  * The test unit listener is used to send the result to the Probe Dock server
  *
- * @author Laurent Prevost <laurent.prevost@probedock.io>
+ * @author Laurent Prevost, laurent.prevost@probedock.io
  */
 public class ProbeListener extends AbstractProbeListener {
     private static final Logger LOGGER = Logger.getLogger(ProbeListener.class.getCanonicalName());

@@ -1,3 +1,7 @@
+## v0.5.2 - June 22, 2016
+
+* Bumpded lib version to 0.4.1
+
 ## v0.5.1 - March 8, 2016
 
 * Fixed NPE when any exception is raised in @BeforeClass (probably same behavior with @AfterClass)

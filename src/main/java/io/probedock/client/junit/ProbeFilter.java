@@ -11,7 +11,7 @@ import org.junit.runner.manipulation.Filter;
 /**
  * Allow filtering of the tests at runtime.
  *
- * @author Laurent Prevost <laurent.prevost@probedock.io>
+ * @author Laurent Prevost, laurent.prevost@probedock.io
  */
 public class ProbeFilter extends Filter {
 	/**

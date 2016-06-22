@@ -21,7 +21,7 @@ import org.junit.runner.notification.RunListener;
 /**
  * Shared code to create Junit Probe Dock listeners
  *
- * @author Laurent Prevost <laurent.prevost@probedock.io>
+ * @author Laurent Prevost, laurent.prevost@probedock.io
  */
 public abstract class AbstractProbeListener extends RunListener {
     private static final Logger LOGGER = Logger.getLogger(AbstractProbeListener.class.getCanonicalName());
@@ -104,7 +104,7 @@ public abstract class AbstractProbeListener extends RunListener {
      *
      * @param description The representation of the test
      * @return The annotation found, or null if not found
-     * @throws NoSuchMethodException
+     * @throws NoSuchMethodException No method found
      */
     protected ProbeTest getMethodAnnotation(Description description) throws NoSuchMethodException {
         String methodName = description.getMethodName();
